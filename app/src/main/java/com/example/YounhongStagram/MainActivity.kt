@@ -1,4 +1,4 @@
-package com.example.instagram
+package com.example.YounhongStagram
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
