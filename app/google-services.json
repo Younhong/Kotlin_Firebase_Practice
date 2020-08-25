@@ -8,12 +8,20 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:332541513904:android:5e13145f1a1a0ece882b75",
+        "mobilesdk_app_id": "1:332541513904:android:666814bceac735b6882b75",
         "android_client_info": {
           "package_name": "com.example.YounhongStagram"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "332541513904-6dl0rljpqo4gjoqq4jt8mj1p4rb8togi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.YounhongStagram",
+            "certificate_hash": "9b6cd16147a6ccb6665a031f803b3f9cc1912d9c"
+          }
+        },
         {
           "client_id": "332541513904-ovsfoeadjd3b4mp9u4ecgb5p1d334j9t.apps.googleusercontent.com",
           "client_type": 3
