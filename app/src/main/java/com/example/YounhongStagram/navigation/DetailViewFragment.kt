@@ -1,5 +1,6 @@
 package com.example.YounhongStagram.navigation
 
+import UserFragment
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -42,6 +43,8 @@ class DetailViewFragment : Fragment() {
                 ?.addSnapshotListener { querySnapshot, firebaseFirestoreException ->
                     contentDTO.clear()
                     contentUidList.clear()
+                    if (querySnapshot == null) return@addSnapshotListener
+
                     for (snapshot in querySnapshot!!.documents) {
                         var item = snapshot.toObject(ContentDTO::class.java)
                         contentDTO.add(item!!)
@@ -79,6 +82,16 @@ class DetailViewFragment : Fragment() {
                 viewholder.detailviewitem_favorite_imageview.setImageResource(
                     R.drawable.ic_favorite_border
                 )
+            }
+
+            viewholder.detailviewitem_profile_image.setOnClickListener {
+                var fragment = UserFragment()
+                var bundle = Bundle()
+                bundle.putString("destinationUid", contentDTO[position].uid)
+                bundle.putString("userId", contentDTO[position].userId)
+                fragment.arguments = bundle
+                activity?.supportFragmentManager?.beginTransaction()?.replace(
+                    R.id.main_content, fragment)?.commit()
             }
         }
 
