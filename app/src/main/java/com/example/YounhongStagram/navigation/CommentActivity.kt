@@ -12,6 +12,7 @@ import com.bumptech.glide.request.RequestOptions
 import com.example.YounhongStagram.R
 import com.example.YounhongStagram.navigation.model.AlarmDTO
 import com.example.YounhongStagram.navigation.model.ContentDTO
+import com.example.YounhongStagram.navigation.util.FcmPush
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.activity_comment.*
@@ -53,6 +54,9 @@ class CommentActivity : AppCompatActivity() {
         alarmDTO.message = message
         FirebaseFirestore.getInstance().collection("alarms")
             .document().set(alarmDTO)
+
+        var msg = FirebaseAuth.getInstance()?.currentUser?.email + " " + getString(R.string.alarm_comment) + " of " + message
+        FcmPush.instance.sendMessage(destinationUid, "Younhongstagram", msg)
     }
 
     inner class CommentRecyclerViewAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>(){

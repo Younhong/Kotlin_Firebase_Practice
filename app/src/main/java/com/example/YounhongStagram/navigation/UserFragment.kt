@@ -19,6 +19,7 @@ import com.example.YounhongStagram.R
 import com.example.YounhongStagram.navigation.model.AlarmDTO
 import com.example.YounhongStagram.navigation.model.ContentDTO
 import com.example.YounhongStagram.navigation.model.FollowDTO
+import com.example.YounhongStagram.navigation.util.FcmPush
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.activity_main.*
@@ -173,6 +174,9 @@ class UserFragment : Fragment() {
         alarmDTO.tiemstamp = System.currentTimeMillis()
         FirebaseFirestore.getInstance().collection("alarms")
             .document().set(alarmDTO)
+
+        var message = auth?.currentUser?.email + " " + getString(R.string.alarm_follow)
+        FcmPush.instance.sendMessage(destinationUid, "Younhongstagram", message)
     }
 
     inner class UserFragmentRecyclerViewAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
