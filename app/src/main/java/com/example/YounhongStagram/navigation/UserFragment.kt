@@ -16,6 +16,7 @@ import com.bumptech.glide.request.RequestOptions
 import com.example.YounhongStagram.LoginActivity
 import com.example.YounhongStagram.MainActivity
 import com.example.YounhongStagram.R
+import com.example.YounhongStagram.navigation.model.AlarmDTO
 import com.example.YounhongStagram.navigation.model.ContentDTO
 import com.example.YounhongStagram.navigation.model.FollowDTO
 import com.google.firebase.auth.FirebaseAuth
@@ -111,6 +112,8 @@ class UserFragment : Fragment() {
                 followDTO!!.followerCount = 1
                 followDTO!!.followers[currentUserUid!!] = true
 
+                followerAlarm(uid!!)
+
                 transaction.set(tsDocFollower, followDTO!!)
                 return@runTransaction
             }
@@ -120,6 +123,7 @@ class UserFragment : Fragment() {
             } else {
                 followDTO!!.followerCount = followDTO!!.followerCount + 1
                 followDTO!!.followers[currentUserUid!!] = true
+                followerAlarm(uid!!)
             }
             transaction.set(tsDocFollower, followDTO!!)
             return@runTransaction
@@ -145,7 +149,6 @@ class UserFragment : Fragment() {
                         fragmentView?.account_btn_follow_signout?.text = getString(R.string.follow)
                         fragmentView?.account_btn_follow_signout?.background?.colorFilter = null
                     }
-
                 }
             }
         }
@@ -158,18 +161,27 @@ class UserFragment : Fragment() {
                 var url = documentSnapshot?.data!!["image"]
                 Glide.with(activity!!).load(url).apply(RequestOptions().circleCrop()).into(fragmentView!!.account_iv_profile)
             }
-
         }
+    }
 
+    fun followerAlarm(destinationUid : String) {
+        var alarmDTO = AlarmDTO()
+        alarmDTO.destinationUid = destinationUid
+        alarmDTO.userId = auth?.currentUser?.email
+        alarmDTO.uid = auth?.currentUser?.uid
+        alarmDTO.kind = 2
+        alarmDTO.tiemstamp = System.currentTimeMillis()
+        FirebaseFirestore.getInstance().collection("alarms")
+            .document().set(alarmDTO)
     }
 
     inner class UserFragmentRecyclerViewAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         var contentDTO : ArrayList<ContentDTO> = arrayListOf()
         init {
             firestore?.collection("images")?.whereEqualTo("uid", uid)
-                ?.addSnapshotListener { querySnapshot, firebaseFirestoreException ->
-                    if (querySnapshot == null) return@addSnapshotListener
-                    for (snapshot in querySnapshot.documents) {
+                ?.addSnapshotListener { value, error ->
+                    if (value == null) return@addSnapshotListener
+                    for (snapshot in value.documents) {
                         contentDTO.add(snapshot.toObject(ContentDTO::class.java)!!)
                     }
                     fragmentView?.account_tv_post_count?.text = contentDTO.size.toString()

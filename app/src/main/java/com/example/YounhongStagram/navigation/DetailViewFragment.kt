@@ -1,6 +1,7 @@
 package com.example.YounhongStagram.navigation
 
 import UserFragment
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.YounhongStagram.R
+import com.example.YounhongStagram.navigation.model.AlarmDTO
 import com.example.YounhongStagram.navigation.model.ContentDTO
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -35,19 +37,19 @@ class DetailViewFragment : Fragment() {
     }
 
     inner class DetailViewRecyclerViewAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
-        var contentDTO : ArrayList<ContentDTO> = arrayListOf()
+        var contentDTOs : ArrayList<ContentDTO> = arrayListOf()
         var contentUidList : ArrayList<String> = arrayListOf()
 
         init {
             firestore?.collection("images")?.orderBy("timestamp")
-                ?.addSnapshotListener { querySnapshot, firebaseFirestoreException ->
-                    contentDTO.clear()
+                ?.addSnapshotListener { value, error ->
+                    contentDTOs.clear()
                     contentUidList.clear()
-                    if (querySnapshot == null) return@addSnapshotListener
+                    if (value == null) return@addSnapshotListener
 
-                    for (snapshot in querySnapshot!!.documents) {
+                    for (snapshot in value!!.documents) {
                         var item = snapshot.toObject(ContentDTO::class.java)
-                        contentDTO.add(item!!)
+                        contentDTOs.add(item!!)
                         contentUidList.add(snapshot.id)
                     }
                     notifyDataSetChanged()
@@ -64,39 +66,41 @@ class DetailViewFragment : Fragment() {
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
             var viewholder = (holder as CustomViewHolder).itemView
 
-            viewholder.detailviewitem_profile_textview.text = contentDTO!![position].userId
-            Glide.with(holder.itemView.context).load(contentDTO!![position].imageUrl).into(viewholder.detailviewitem_imageview_content)
-            viewholder.detailviewitem_explain_textview.text = contentDTO!![position].explain
-            viewholder.detailviewitem_favorite_counter_textview.text = "Likes " + contentDTO!![position].favoriteCount
+            viewholder.detailviewitem_profile_textview.text = contentDTOs!![position].userId
+            Glide.with(holder.itemView.context).load(contentDTOs!![position].imageUrl).into(viewholder.detailviewitem_imageview_content)
+            viewholder.detailviewitem_explain_textview.text = contentDTOs!![position].explain
+            viewholder.detailviewitem_favorite_counter_textview.text = "Likes " + contentDTOs!![position].favoriteCount
 //            Glide.with(holder.itemView.context).load(contentDTO!![position].imageUrl).into(viewholder.detailviewitem_profile_image)
 
             viewholder.detailviewitem_favorite_imageview.setOnClickListener {
                 favoriteEvent(position)
             }
 
-            if (contentDTO!![position].favorites.containsKey(uid)) {
-                viewholder.detailviewitem_favorite_imageview.setImageResource(
-                    R.drawable.ic_favorite
-                )
+            if (contentDTOs!![position].favorites.containsKey(uid)) {
+                viewholder.detailviewitem_favorite_imageview.setImageResource(R.drawable.ic_favorite)
             } else {
-                viewholder.detailviewitem_favorite_imageview.setImageResource(
-                    R.drawable.ic_favorite_border
-                )
+                viewholder.detailviewitem_favorite_imageview.setImageResource(R.drawable.ic_favorite_border)
             }
 
             viewholder.detailviewitem_profile_image.setOnClickListener {
                 var fragment = UserFragment()
                 var bundle = Bundle()
-                bundle.putString("destinationUid", contentDTO[position].uid)
-                bundle.putString("userId", contentDTO[position].userId)
+                bundle.putString("destinationUid", contentDTOs[position].uid)
+                bundle.putString("userId", contentDTOs[position].userId)
                 fragment.arguments = bundle
                 activity?.supportFragmentManager?.beginTransaction()?.replace(
                     R.id.main_content, fragment)?.commit()
             }
+            viewholder.detailviewitem_comment_imageview.setOnClickListener { v ->
+                var intent = Intent(v.context, CommentActivity::class.java)
+                intent.putExtra("contentUid", contentUidList[position])
+                intent.putExtra("destinationUid", contentDTOs[position].uid)
+                startActivity(intent)
+            }
         }
 
         override fun getItemCount(): Int {
-            return contentDTO.size
+            return contentDTOs.size
         }
 
         fun favoriteEvent(position: Int) {
@@ -110,9 +114,21 @@ class DetailViewFragment : Fragment() {
                 } else {
                     contentDTO?.favoriteCount = contentDTO?.favoriteCount + 1
                     contentDTO?.favorites[uid!!] = true
+                    favoriteAlarm(contentDTOs[position].uid!!)
                 }
                 transaction.set(tsDoc, contentDTO)
             }
+        }
+
+        fun favoriteAlarm(destinationUid : String) {
+            var alarmDTO = AlarmDTO()
+            alarmDTO.destinationUid = destinationUid
+            alarmDTO.userId = FirebaseAuth.getInstance().currentUser?.email
+            alarmDTO.uid = FirebaseAuth.getInstance().currentUser?.uid
+            alarmDTO.kind = 0
+            alarmDTO.tiemstamp = System.currentTimeMillis()
+            FirebaseFirestore.getInstance().collection("alarms")
+                .document().set(alarmDTO)
         }
     }
 }

@@ -36,10 +36,10 @@ class GridFragment : Fragment() {
     inner class UserFragmentRecyclerViewAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         var contentDTO : ArrayList<ContentDTO> = arrayListOf()
         init {
-            firestore?.collection("images")?.addSnapshotListener {
-                    querySnapshot, firebaseFirestoreException ->
-                    if (querySnapshot == null) return@addSnapshotListener
-                    for (snapshot in querySnapshot.documents) {
+            firestore?.collection("images")
+                ?.addSnapshotListener { value, error ->
+                    if (value == null) return@addSnapshotListener
+                    for (snapshot in value.documents) {
                         contentDTO.add(snapshot.toObject(ContentDTO::class.java)!!)
                     }
                     notifyDataSetChanged()
