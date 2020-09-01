@@ -94,10 +94,10 @@ class UserFragment : Fragment() {
 
             if (followDTO.followings.containsKey(uid)) {
                 followDTO?.followingCount = followDTO?.followingCount - 1
-                followDTO?.followers?.remove(uid)
+                followDTO?.followings?.remove(uid)
             } else {
                 followDTO?.followingCount = followDTO?.followingCount + 1
-                followDTO?.followers[uid!!] = true
+                followDTO?.followings[uid!!] = true
             }
             transaction.set(tsDocFollowing, followDTO)
             return@runTransaction
@@ -152,13 +152,15 @@ class UserFragment : Fragment() {
     }
 
     fun getProfileImage() {
-        firestore?.collection("profileImages")?.document(uid!!)?.addSnapshotListener { documentsnapshot, firebaseFirestoreException ->
-            if (documentsnapshot == null) return@addSnapshotListener
-            else {
-                var url = documentsnapshot?.data!!["image"]
-                Glide.with(activity!!).load(url).apply(RequestOptions().circleCrop()).into(fragmentView?.account_iv_profile!!)
+        firestore?.collection("profileImages")?.document(uid!!)?.addSnapshotListener { documentSnapshot, firebaseFirestoreException ->
+            if (documentSnapshot == null) return@addSnapshotListener
+            if (documentSnapshot.data != null) {
+                var url = documentSnapshot?.data!!["image"]
+                Glide.with(activity!!).load(url).apply(RequestOptions().circleCrop()).into(fragmentView!!.account_iv_profile)
             }
+
         }
+
     }
 
     inner class UserFragmentRecyclerViewAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
