@@ -13,6 +13,7 @@ import com.bumptech.glide.Glide
 import com.example.YounhongStagram.R
 import com.example.YounhongStagram.navigation.model.AlarmDTO
 import com.example.YounhongStagram.navigation.model.ContentDTO
+import com.example.YounhongStagram.navigation.util.FcmPush
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.android.synthetic.main.fragment_detail.view.*
@@ -129,6 +130,9 @@ class DetailViewFragment : Fragment() {
             alarmDTO.tiemstamp = System.currentTimeMillis()
             FirebaseFirestore.getInstance().collection("alarms")
                 .document().set(alarmDTO)
+
+            var message = FirebaseAuth.getInstance()?.currentUser?.email + " " + getString(R.string.alarm_favorite)
+            FcmPush.instance.sendMessage(destinationUid, "Younhongstagram", message)
         }
     }
 }

@@ -12,6 +12,7 @@ import android.view.View
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.YounhongStagram.navigation.*
+import com.example.YounhongStagram.navigation.util.FcmPush
 import com.google.android.gms.tasks.Task
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
@@ -95,6 +96,11 @@ class MainActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemS
                 .document(uid!!).set(map)
         }
     }
+
+//    override fun onStop() {
+//        super.onStop()
+//        FcmPush.instance.sendMessage("테스트 할 유저 id", "타이틀", "메시지")
+//    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
