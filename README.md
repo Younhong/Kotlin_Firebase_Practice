@@ -1,1 +1,4 @@
-# Kotlin_Firebase_Practice
+# Environment
+* IDE: Android Studio
+* Database: Firebase
+* Language: Kotlin Language
